@@ -3,10 +3,12 @@ package com.example.musictheory.services;
 import com.example.musictheory.models.Question;
 import com.example.musictheory.repositories.QuizRepository;
 import com.example.musictheory.utils.Util;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,7 +79,7 @@ public class QuizService {
         return quizRepository.save(newQuestion);
     }
 
-    public Question updateQuestion(Question updatedQuestion) throws FileNotFoundException {
+    public Question updateQuestion(Question updatedQuestion) throws IOException {
 
         Optional<Question> question = quizRepository.findQuestionByUid(updatedQuestion.getUid());
         if (question.isPresent()) {

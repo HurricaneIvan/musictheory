@@ -2,6 +2,7 @@ package com.example.musictheory.utils;
 
 import com.example.musictheory.dtos.QuestionDto;
 import com.example.musictheory.models.Question;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ public class Util {
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int ID_LENGTH = 5;
     private static final SecureRandom secureRandom = new SecureRandom();
+    private final String  regrex = "^[a-zA-Z0-9:.,?]+$";
 
     public String generateUid(){
         StringBuilder sb = new StringBuilder(ID_LENGTH);
@@ -30,10 +32,18 @@ public class Util {
         }
     }
 
+//    public String validateUid(String uid) throws IOException {
+//        if(StringUtils.isAlphanumeric(uid)) {
+//            return uid;
+//        } else {
+//            throw new IOException("Invalid Uid Provided");
+//        }
+//    }
+
     public Question questionValidator(QuestionDto question) throws IOException {
         Question validated = new Question();
         if(question != null && !question.toString().isBlank()){
-            if(isNotNullOrEmpty(question.getQuestion())){
+            if(isNotNullOrEmpty(question.getQuestion()) && question.getQuestion().matches(regrex)){
                 validated.setQuestion(question.getQuestion());
             }
             if(question.getImage().isBlank()){
@@ -49,7 +59,6 @@ public class Util {
                 validated.setProficiency(question.getProficiency());
             }
         }
-
         return validated;
     }
 }

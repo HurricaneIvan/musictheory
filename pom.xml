@@ -13,7 +13,7 @@
 	<artifactId>musictheory</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>musictheory</name>
-	<description>A Simple Music Theory Quizzard</description>
+	<description>A Simple Music Theory Quiz</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -66,6 +66,11 @@
             <artifactId>mockito-core</artifactId>
             <version>5.20.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>8.0.1.Final</version> <!-- Use the appropriate version for your Spring Boot/Jakarta EE environment -->
         </dependency>
 	</dependencies>
 

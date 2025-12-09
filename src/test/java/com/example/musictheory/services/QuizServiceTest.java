@@ -9,6 +9,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -222,7 +223,7 @@ public class QuizServiceTest {
     }
 
     @Test
-    public void testUpdateQuestion_sunny_day() throws FileNotFoundException {
+    public void testUpdateQuestion_sunny_day() throws IOException {
         String expectedUid = "PARTY";
 
         List<String> options = Arrays.asList("Butler with the candle stick", "Gardener in the foyer", "Drunk Nephew", "Jealous Aunt");

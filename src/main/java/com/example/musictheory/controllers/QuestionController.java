@@ -5,6 +5,7 @@ import com.example.musictheory.models.Question;
 import com.example.musictheory.services.QuizService;
 import com.example.musictheory.utils.Util;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,9 +48,10 @@ public class QuestionController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
     @PostMapping(value = "/question")
     public ResponseEntity<Question> createQuestion(@Valid @RequestBody QuestionDto questionDto) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
-        //scrub dto
+
         Question question;
         try {
             question = util.questionValidator(questionDto);
@@ -61,17 +63,12 @@ public class QuestionController {
         }
     }
 
-//    @PostMapping("/create")
-//    public ResponseEntity<Question> createQuestion(@Valid @RequestBody Question question) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
-//        //scrub dto, then if required fields are null throw IOException bad request
-//        return new ResponseEntity<>(quizService.createQuestion(question), HttpStatus.CREATED);
-//    }
 
-    @PatchMapping(value = "/update")
+    @PatchMapping(value = "/question")
     public ResponseEntity<Question> updateQuestion(@RequestBody QuestionDto question) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
         try {
             Question validated;
-            if (question != null && !question.getUid().isBlank()) {
+            if (question != null && StringUtils.isAlphanumeric(question.getUid())) {
                 validated = util.questionValidator(question);
             } else{
                 throw new IOException("Invalid Input :: Missing Question Object and/or uid");
