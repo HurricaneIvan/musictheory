@@ -2,7 +2,6 @@ package com.example.musictheory.utils;
 
 import com.example.musictheory.dtos.QuestionDto;
 import com.example.musictheory.models.Question;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -14,7 +13,6 @@ public class Util {
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int ID_LENGTH = 5;
     private static final SecureRandom secureRandom = new SecureRandom();
-    private final String  regrex = "^[a-zA-Z0-9:.,?]+$";
 
     public String generateUid(){
         StringBuilder sb = new StringBuilder(ID_LENGTH);
@@ -43,7 +41,8 @@ public class Util {
     public Question questionValidator(QuestionDto question) throws IOException {
         Question validated = new Question();
         if(question != null && !question.toString().isBlank()){
-            if(isNotNullOrEmpty(question.getQuestion()) && question.getQuestion().matches(regrex)){
+            String regex = "^[a-zA-Z0-9:.,?]+$";
+            if(isNotNullOrEmpty(question.getQuestion()) && question.getQuestion().matches(regex)){
                 validated.setQuestion(question.getQuestion());
             }
             if(question.getImage().isBlank()){
