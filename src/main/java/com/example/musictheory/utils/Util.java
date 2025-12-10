@@ -30,14 +30,6 @@ public class Util {
         }
     }
 
-//    public String validateUid(String uid) throws IOException {
-//        if(StringUtils.isAlphanumeric(uid)) {
-//            return uid;
-//        } else {
-//            throw new IOException("Invalid Uid Provided");
-//        }
-//    }
-
     public Question questionValidator(QuestionDto question) throws IOException {
         Question validated = new Question();
         if(question != null && !question.toString().isBlank()){

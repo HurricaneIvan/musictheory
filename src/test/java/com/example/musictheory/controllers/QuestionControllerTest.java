@@ -48,14 +48,6 @@ public class QuestionControllerTest {
     @Mock
     private Util util;
 
-
-//    @BeforeEach
-//    public void setUp(){
-//        List<String> options = Arrays.asList("Butler with the candle stick", "Gardener in the foyer", "Drunk Nephew", "Jealous Aunt");
-//        question = new Question("PARTY", "Who dun it?", "image", options, "Butler with the candle stick", "beginner");
-//
-//    }
-
     @BeforeEach
     public void setUp(){
         mockMvc = MockMvcBuilders.standaloneSetup(questionController).build();
@@ -76,7 +68,7 @@ public class QuestionControllerTest {
     }
 
     @Test
-    void testGetQuestion() throws Exception {
+    void testGetQuestion_sunny_day() throws Exception {
         List<String> options = Arrays.asList("Butler with the candle stick", "Gardener in the foyer", "Drunk Nephew", "Jealous Aunt");
         Question expected = new Question("PARTY", "Who dun it?", "image", options, "Butler with the candle stick", "beginner");
 
@@ -91,14 +83,23 @@ public class QuestionControllerTest {
     }
 
     @Test
-    void testGetQuestion_invalidUID() throws Exception {
+    void testGetQuestion_NotFoundUid() throws Exception {
         doThrow(new FileNotFoundException("Question object does not exist in database. Retry with existing uid.")).when(quizService).findQuestionByUid("EMPTY");
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/question")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("EMPTY"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
         verify(quizService, times(1)).findQuestionByUid("EMPTY");
+        assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    void testGetQuestion_invalidUID() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/question")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("E#P7Y"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
         assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
     }
 
@@ -377,4 +378,63 @@ public class QuestionControllerTest {
         assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
     }
 
+    @Test
+    void testSoftDeleteQuestion_sunny_day() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/question")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("PAR3Y"))
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        verify(quizService, times(1)).softDeleteQuestion("PAR3Y");
+        assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    void testSoftDeleteQuestion_NotFoundUid() throws Exception {
+        doThrow(new FileNotFoundException("Uid not Found. Retry with valid uid")).when(quizService).softDeleteQuestion("PARTY");
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/question")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("PARTY"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+        assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    void testSoftDeleteQuestion_InvalidUid() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/question")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("P@R^9"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
+        assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    void testDeleteQuestion_sunny_day() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("PAR3Y"))
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        verify(quizService, times(1)).deleteQuestion("PAR3Y");
+        assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    void testDeleteQuestion_NotFoundUid() throws Exception {
+        doThrow(new FileNotFoundException("Uid not Found. Retry with valid uid")).when(quizService).deleteQuestion("PARTY");
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("PARTY"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+        assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    void testDeleteQuestion_InvalidUid() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("P@R^9"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
+        assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+    }
 }
