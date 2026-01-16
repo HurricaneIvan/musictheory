@@ -5,12 +5,12 @@ import com.example.musictheory.models.Question;
 import com.example.musictheory.services.QuizService;
 import com.example.musictheory.utils.Util;
 import jakarta.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
@@ -45,7 +45,7 @@ public class QuestionController {
     @GetMapping(value = "/question")
     public ResponseEntity<Optional<Question>> getQuestion(@RequestBody String uid){
         try {
-            if (StringUtils.isAlphanumeric(uid)) {
+            if (util.isValidUid(uid)) {
                 return new ResponseEntity<>(quizService.findQuestionByUid(uid), HttpStatus.OK);
             } else{
                 throw new IOException("Invalid Uid. Retry with valid uid.");
@@ -78,7 +78,7 @@ public class QuestionController {
     public ResponseEntity<Question> updateQuestion(@RequestBody QuestionDto question) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
         try {
             Question validated;
-            if (question != null && StringUtils.isAlphanumeric(question.getUid())) {
+            if (question != null && util.isValidUid(question.getUid())) {
                 validated = util.questionValidator(question);
             } else{
                 throw new IOException("Invalid Input :: Missing Question Object and/or uid");
@@ -96,10 +96,11 @@ public class QuestionController {
     }
 
     //Soft Delete
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/question")
     public ResponseEntity<String> deleteSoftQuestion(@RequestBody String uid) {
         try {
-            if (StringUtils.isAlphanumeric(uid)) {
+            if (util.isValidUid(uid)) {
                 quizService.softDeleteQuestion(uid);
                 return new ResponseEntity<>("Question Removed", HttpStatus.OK);
             } else {
@@ -115,10 +116,11 @@ public class QuestionController {
     }
 
     // Delete
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/delete")
     public ResponseEntity<String> deleteQuestion(@RequestBody String uid) {
         try{
-            if (StringUtils.isAlphanumeric(uid)) {
+            if (util.isValidUid(uid)) {
                 quizService.deleteQuestion(uid);
                 return new ResponseEntity<>("Question Removed", HttpStatus.OK);
             } else {
