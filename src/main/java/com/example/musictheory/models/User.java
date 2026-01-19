@@ -6,9 +6,6 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 
@@ -28,8 +25,8 @@ public class User {
     @Email
     private String email; //future expansion retrieve forgotten creds
     @Schema(hidden = true)
-    @DocumentReference
-    private Set<Role> role; // not sure if initialization needed
+//    @DocumentReference
+    private String role; // not sure if initialization needed
     @Schema(hidden = true)
     private String proficiency;
     @Schema(hidden = true)
@@ -54,7 +51,7 @@ public class User {
         this.firstName = firstName;
     }
 
-    public User(String firstName, String lastName, String username, String password, String email, Set<Role> role, String proficiency, List<Integer> score) {
+    public User(String firstName, String lastName, String username, String password, String email, String role, String proficiency, List<Integer> score) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;

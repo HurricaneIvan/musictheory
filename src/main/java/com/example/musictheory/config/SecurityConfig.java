@@ -48,12 +48,12 @@ public class SecurityConfig {
         return new AuthTokenFilter();
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userService);
-        authProvider.setPasswordEncoder(bCryptPasswordEncoder());
-        return authProvider;
-    }
+//    @Bean
+//    public DaoAuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userService);
+//        authProvider.setPasswordEncoder(bCryptPasswordEncoder());
+//        return authProvider;
+//    }
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -123,14 +123,14 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-                                .requestMatchers("/api/**").hasRole("ADMIN") // Only users with "ADMIN" role
-                                .requestMatchers("/public/**").permitAll()
-//                                .requestMatchers("/api/public/**").hasAnyRole("USER", "ADMIN") // Users with "USER" or "ADMIN"
+                                .requestMatchers("/api/**").permitAll() //.hasRole("ADMIN") // Only users with "ADMIN" role
+//                                .requestMatchers("/api/v1/**").hasAnyAuthority("USER", "DEV", "ADMIN")//.permitAll()
+                                .requestMatchers("/api/v1/**").hasAnyRole("USER", "ADMIN") // Users with "USER" or "ADMIN"
                                 .anyRequest().authenticated() // All other requests must be authenticated
                 )
                 .formLogin(withDefaults()); // ... configure form login etc.
 
-        http.authenticationProvider(authenticationProvider());
+//        http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

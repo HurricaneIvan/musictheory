@@ -3,6 +3,7 @@ package com.example.musictheory.controllers;
 import com.example.musictheory.dtos.QuestionDto;
 import com.example.musictheory.models.Question;
 import com.example.musictheory.services.QuizService;
+import com.example.musictheory.utils.JWTUtil;
 import com.example.musictheory.utils.Util;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +28,9 @@ public class QuestionController {
     private QuizService quizService;
 
     @Autowired
+    JWTUtil jwtUtil;
+
+    @Autowired
     private Util util;
 
 /*
@@ -39,6 +43,7 @@ public class QuestionController {
 
     @GetMapping(value = "/questions")
     public ResponseEntity<List<Question>> getAllQuestions() {
+
         return new ResponseEntity<>(quizService.findAllQuestions(), HttpStatus.OK);
     }
 

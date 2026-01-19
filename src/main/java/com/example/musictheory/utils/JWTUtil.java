@@ -1,18 +1,20 @@
 package com.example.musictheory.utils;
 
+import com.example.musictheory.models.User;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -23,29 +25,54 @@ public class JWTUtil {
     @Value("${jwt.cookie}")
     private String jwtCookie;
 
+    private final String SECRET_KEY = "cookiemonstersesamestreet";
+//    private static final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+
     private static final long EXPIRATION_TIME = 3600000; // 1 hour
 
+    private SecretKey secretKey;
+
+    public JWTUtil() {
+        this.secretKey = Jwts.SIG.HS256.key().build();
+    }
     private SecretKey key() {
-        return Jwts.SIG.HS256.key().build();
+        return secretKey;
     }
 
-    public String generateToken(String username) {
+//    private SecretKey key() {
+//        return Jwts.SIG.HS256.key().build();
+//    }
+
+    public String generateToken(User user) {
+        logger.info("generateToken :: user {}", user.toString());
         return Jwts.builder()
-                .header().type("JWT").and()
-                .subject(username)
+                .claim("role", user.getRole()) // .toString is null why?
+                .subject(user.getUsername())
                 .issuedAt((new Date(System.currentTimeMillis())))
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key())
                 .compact();
     }
 
+
     public String extractUsernameFromToken(String token) {
         return Jwts.parser()
-                .verifyWith(key())
+//                .verifyWith(key())
+                .setSigningKey(key())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
+                .getBody()
                 .getSubject();
+    }
+
+    public String extractUserRoleFromToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(key())
+                .build()
+                .parseSignedClaims(token)
+                .getBody()
+                .get("role", String.class);
     }
 //
 //    /**
@@ -91,13 +118,14 @@ public class JWTUtil {
     }
 
 
-    public ResponseCookie generateJwtCookie(String username) {
-        String jwt = generateToken(username);
-        return ResponseCookie.from(jwtCookie, jwt).path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
+    public ResponseCookie generateJwtCookie(User user) {
+        String jwt = generateToken(user);
+        return ResponseCookie.from(jwtCookie, jwt).path("/").maxAge(24 * 60 * 60).httpOnly(true).build();
     }
 
     public String getJwtFromCookies(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, jwtCookie);
+        logger.info("get cookie" + cookie);
         if (cookie != null) {
             return cookie.getValue();
         } else {
