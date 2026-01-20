@@ -11,7 +11,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -30,17 +29,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-//            String jwt = parseJwt(request);
-//            logger.info("AuthTokenFilter cookie ::" + jwt);
-            String authHeader = request.getHeader("Authorization");
 
+            String authHeader = request.getHeader("Authorization");
 
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
                 String username = jwtUtil.extractUsernameFromToken(token);
                 String role = jwtUtil.extractUserRoleFromToken(token);
-                logger.info("AuthTokenFilter :: role :: " + role);
-//                logger.info(SecurityContextHolder.getContext().getAuthentication().toString());
 
                 if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
                     UserDetails userDetails = new User(username, "", Collections.singleton(new SimpleGrantedAuthority(role)));
@@ -49,19 +44,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(userDetails, null,
                                     userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
                 }
-//                UserDetails userDetails = userService.loadUserByUsername(username);
-//                logger.info("AuthTokenFilter :: role :: " + userDetails.toString());
-
-//                UsernamePasswordAuthenticationToken authToken =
-//                        new UsernamePasswordAuthenticationToken(userDetails,
-//                                null,
-//                                userDetails.getAuthorities());
-
-//                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//
-//                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);
@@ -69,9 +52,4 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
-    private String parseJwt(HttpServletRequest request) {
-        return jwtUtil.getJwtFromCookies(request);
-    }
-
 }

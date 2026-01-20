@@ -37,9 +37,6 @@ public class LoginController {
     private UserService userService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     JWTUtil jwtUtil;
 
     @Autowired
@@ -53,7 +50,7 @@ public class LoginController {
     * */
 
     @PostMapping(value = "/login")
-    public ResponseEntity<?> login(UserDto user){
+    public ResponseEntity<?> login(@RequestBody UserDto user){
 
         try {
             User sanitized = util.validateAndSanitizeUser(user);
@@ -62,27 +59,17 @@ public class LoginController {
                 String token = jwtUtil.generateToken(findUser);
                 String cookie = String.valueOf(jwtUtil.generateJwtCookie(findUser));
                 logger.info("login cookie :: " + cookie);
-//                return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).build();
                 return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, token)
                     .body(userService.findUserByUsername(findUser.getUsername()));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-
-//            UserDetails userDetail = userService.loadUserByUsername(sanitized.getUsername());
-//            String token = jwtUtil.generateToken(userDetail);
-//            logger.info("Auth :: " + userDetail.getAuthorities().toString());
-////            ResponseCookie jwtCookie = jwtUtil.generateJwtCookie(userDetail.getUsername());
-////            logger.info("cookie :: {} " + jwtCookie.getName().toString());
-//
-//            return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, token)
-//                    .body(userService.findUserByUsername(userDetail.getUsername()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<User> register(UserDto user){
+    public ResponseEntity<User> register(@RequestBody UserDto user){
 
         try {
             User sanitized = util.validateAndSanitizeUser(user);

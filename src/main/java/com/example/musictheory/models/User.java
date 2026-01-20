@@ -25,8 +25,7 @@ public class User {
     @Email
     private String email; //future expansion retrieve forgotten creds
     @Schema(hidden = true)
-//    @DocumentReference
-    private String role; // not sure if initialization needed
+    private String role;
     @Schema(hidden = true)
     private String proficiency;
     @Schema(hidden = true)

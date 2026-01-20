@@ -5,16 +5,22 @@ import com.example.musictheory.dtos.UserDto;
 import com.example.musictheory.models.Proficiency;
 import com.example.musictheory.models.Question;
 import com.example.musictheory.models.User;
+import com.example.musictheory.services.UserService;
 import com.google.json.JsonSanitizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component
 public class Util {
+    private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int ID_LENGTH = 5;
@@ -40,9 +46,19 @@ public class Util {
         String regex = "^[a-zA-Z0-9]{5}$";
         return Pattern.matches(regex, input);
     }
+    public Map<String, String> validateLogin(String username, String password) throws IOException {
+        Map<String, String> cleanUser = new HashMap<>();
+        if(isNotNullOrEmpty(username) && isNotNullOrEmpty(password)){
+            String name = JsonSanitizer.sanitize(username);
+            String pass = JsonSanitizer.sanitize(password);
+            cleanUser.put(name, pass);
+        }
+        return cleanUser;
+    }
 
     public User validateAndSanitizeUser(UserDto user) throws IOException {
         User sanitized = new User();
+        logger.info("validate :: "+ user);
         if(user != null && !user.toString().isBlank()){
             String regex = "^[a-zA-Z0-9-_]+$";
             if(isNotNullOrEmpty(user.getFirstname())){
@@ -63,15 +79,6 @@ public class Util {
             if(isNotNullOrEmpty(user.getEmail())){
                 sanitized.setEmail(user.getEmail());
             }
-//            if(isNotNullOrEmpty(user.getProficiency())){
-//                String cleanJson = JsonSanitizer.sanitize(user.getProficiency());
-//                if(Arrays.stream(Proficiency.values())
-//                        .anyMatch(proficiency -> proficiency.name().equalsIgnoreCase(cleanJson))) {
-//                    sanitized.setProficiency(cleanJson);
-//                }
-//            } else {
-//                user.setProficiency(Proficiency.BEGINNER.getProficiency());
-//            }
 
             return sanitized;
         } else {

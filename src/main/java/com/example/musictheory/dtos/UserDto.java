@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data
 @AllArgsConstructor
@@ -13,8 +14,10 @@ public class UserDto {
 
     private String firstname;
     private String lastname;
+    @NonNull
     @Size(min=5, max=20, message = "Username should be between 5-20 characters")
     private String username;
+    @NonNull
     @Size(min=5, max=20, message = "Password should be between 5-20 characters")
     private String password;
     @Email
