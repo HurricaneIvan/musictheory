@@ -7,8 +7,6 @@ import com.example.musictheory.models.User;
 import com.example.musictheory.services.UserService;
 import com.example.musictheory.utils.JWTUtil;
 import com.example.musictheory.utils.Util;
-import com.google.json.JsonSanitizer;
-import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +14,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/public")
@@ -64,14 +58,16 @@ public class LoginController {
                 return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, token)
                     .body(userService.findUserByUsername(findUser.getUsername()));
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
         }
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<User> register(@RequestBody UserDto user){
+    public ResponseEntity<?> register(@RequestBody UserDto user){
 
         try {
             User sanitized = util.validateAndSanitizeUser(user);
@@ -79,7 +75,9 @@ public class LoginController {
             return new ResponseEntity<>(userService.createNewUser(sanitized),HttpStatus.OK);
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -89,5 +87,25 @@ public class LoginController {
         ResponseCookie cookie = jwtUtil.getCleanJwtCookie();
         logger.info(" cookie :: {}" + cookie.toString());
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body("You have been signed out");
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @PostMapping(value = "/update")
+    public ResponseEntity<?> update(@RequestBody UserDto userDto){
+        try {
+            logger.info("user " +userDto.getUsername());
+            if(util.isNotNullOrEmpty(userDto.getUsername())){
+                return new ResponseEntity<>(userService.updateUser(userDto),HttpStatus.OK);
+
+            } else {
+                return ResponseEntity.badRequest().body("Invalid Username");
+            }
+
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+//        return ResponseEntity.ok().body("user updated");
     }
 }

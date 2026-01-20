@@ -3,7 +3,6 @@ package com.example.musictheory.utils;
 import com.example.musictheory.dtos.LoginDto;
 import com.example.musictheory.dtos.QuestionDto;
 import com.example.musictheory.dtos.UserDto;
-import com.example.musictheory.models.Proficiency;
 import com.example.musictheory.models.Question;
 import com.example.musictheory.models.User;
 import com.google.json.JsonSanitizer;
@@ -31,11 +30,11 @@ public class Util {
        return sb.toString();
     }
 
-    public Boolean isNotNullOrEmpty(String elem) throws IOException {
+    public Boolean isNotNullOrEmpty(String elem) {
         if (elem != null && !elem.isBlank()){
             return Boolean.TRUE;
         } else {
-            throw new IOException("Invalid Parameter: Parameter is Missing");
+            return Boolean.FALSE;
         }
     }
 
@@ -46,38 +45,49 @@ public class Util {
 
     public LoginDto sanitizeLogin(LoginDto user) throws IOException {
         LoginDto sanitized = new LoginDto();
-        if(isNotNullOrEmpty(user.getUsername())){
-            sanitized.setUsername(JsonSanitizer.sanitize(user.getUsername()).replaceAll("^\"|\"$", ""));
+        if(isNotNullOrEmpty(user.getUsername()) && isNotNullOrEmpty(user.getPassword())){
+            sanitized.setUsername(sanitizer(user.getUsername()));
+            sanitized.setPassword(sanitizer(user.getPassword()));
         }
-        if(isNotNullOrEmpty(user.getPassword())){
-            sanitized.setPassword(JsonSanitizer.sanitize(user.getPassword()).replaceAll("^\"|\"$", ""));
+        else {
+            throw new IOException("Invalid Input");
         }
         return sanitized;
     }
 
+    public String sanitizer(String elem) {
+        return JsonSanitizer.sanitize(elem).replaceAll("^\"|\"$", "");
+    }
+
     public User validateAndSanitizeUser(UserDto user) throws IOException {
         User sanitized = new User();
-        logger.info("validate :: "+ user);
+        logger.info("validate :: {}", user);
         if(user != null && !user.toString().isBlank()){
             String regex = "^[a-zA-Z0-9-_]+$";
             if(isNotNullOrEmpty(user.getFirstname())){
-                //JsonSanitizer adds second "" to valid input, replaceAll to negate
-                String cleanJson = JsonSanitizer.sanitize(user.getFirstname()).replaceAll("^\"|\"$", "");
-                sanitized.setFirstName(cleanJson);
+                sanitized.setFirstName(sanitizer(user.getFirstname()));
+            } else {
+                throw new IOException("Invalid Parameter: First Name is Missing");
             }
             if(isNotNullOrEmpty(user.getLastname())){
-                String cleanJson = JsonSanitizer.sanitize(user.getLastname()).replaceAll("^\"|\"$", "");
-                sanitized.setLastName(cleanJson);
+                sanitized.setLastName(sanitizer(user.getLastname()));
+            } else {
+                throw new IOException("Invalid Parameter: Last Name is Missing");
             }
             if(isNotNullOrEmpty(user.getUsername()) && user.getUsername().matches(regex)){
                 sanitized.setUsername(user.getUsername());
+            } else {
+                throw new IOException("Invalid Parameter: UserName is Missing");
             }
             if(isNotNullOrEmpty(user.getPassword()) && user.getPassword().matches(regex)){
-                String cleanJson = JsonSanitizer.sanitize(user.getPassword()).replaceAll("^\"|\"$", "");
-                sanitized.setPassword(cleanJson);
+                sanitized.setPassword(sanitizer(user.getPassword()));
+            } else {
+                throw new IOException("Invalid Parameter: Password is Missing");
             }
             if(isNotNullOrEmpty(user.getEmail())){
                 sanitized.setEmail(user.getEmail());
+            } else {
+                throw new IOException("Invalid Parameter: Email is Missing");
             }
 
             return sanitized;
