@@ -1,11 +1,11 @@
 package com.example.musictheory.utils;
 
+import com.example.musictheory.dtos.LoginDto;
 import com.example.musictheory.dtos.QuestionDto;
 import com.example.musictheory.dtos.UserDto;
 import com.example.musictheory.models.Proficiency;
 import com.example.musictheory.models.Question;
 import com.example.musictheory.models.User;
-import com.example.musictheory.services.UserService;
 import com.google.json.JsonSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component
@@ -46,14 +43,16 @@ public class Util {
         String regex = "^[a-zA-Z0-9]{5}$";
         return Pattern.matches(regex, input);
     }
-    public Map<String, String> validateLogin(String username, String password) throws IOException {
-        Map<String, String> cleanUser = new HashMap<>();
-        if(isNotNullOrEmpty(username) && isNotNullOrEmpty(password)){
-            String name = JsonSanitizer.sanitize(username);
-            String pass = JsonSanitizer.sanitize(password);
-            cleanUser.put(name, pass);
+
+    public LoginDto sanitizeLogin(LoginDto user) throws IOException {
+        LoginDto sanitized = new LoginDto();
+        if(isNotNullOrEmpty(user.getUsername())){
+            sanitized.setUsername(JsonSanitizer.sanitize(user.getUsername()).replaceAll("^\"|\"$", ""));
         }
-        return cleanUser;
+        if(isNotNullOrEmpty(user.getPassword())){
+            sanitized.setPassword(JsonSanitizer.sanitize(user.getPassword()).replaceAll("^\"|\"$", ""));
+        }
+        return sanitized;
     }
 
     public User validateAndSanitizeUser(UserDto user) throws IOException {
@@ -62,18 +61,19 @@ public class Util {
         if(user != null && !user.toString().isBlank()){
             String regex = "^[a-zA-Z0-9-_]+$";
             if(isNotNullOrEmpty(user.getFirstname())){
-                String cleanJson = JsonSanitizer.sanitize(user.getFirstname());
+                //JsonSanitizer adds second "" to valid input, replaceAll to negate
+                String cleanJson = JsonSanitizer.sanitize(user.getFirstname()).replaceAll("^\"|\"$", "");
                 sanitized.setFirstName(cleanJson);
             }
             if(isNotNullOrEmpty(user.getLastname())){
-                String cleanJson = JsonSanitizer.sanitize(user.getLastname());
+                String cleanJson = JsonSanitizer.sanitize(user.getLastname()).replaceAll("^\"|\"$", "");
                 sanitized.setLastName(cleanJson);
             }
             if(isNotNullOrEmpty(user.getUsername()) && user.getUsername().matches(regex)){
                 sanitized.setUsername(user.getUsername());
             }
             if(isNotNullOrEmpty(user.getPassword()) && user.getPassword().matches(regex)){
-                String cleanJson = JsonSanitizer.sanitize(user.getPassword());
+                String cleanJson = JsonSanitizer.sanitize(user.getPassword()).replaceAll("^\"|\"$", "");
                 sanitized.setPassword(cleanJson);
             }
             if(isNotNullOrEmpty(user.getEmail())){

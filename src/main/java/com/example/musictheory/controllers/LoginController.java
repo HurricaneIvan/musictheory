@@ -1,11 +1,13 @@
 package com.example.musictheory.controllers;
 
 
+import com.example.musictheory.dtos.LoginDto;
 import com.example.musictheory.dtos.UserDto;
 import com.example.musictheory.models.User;
 import com.example.musictheory.services.UserService;
 import com.example.musictheory.utils.JWTUtil;
 import com.example.musictheory.utils.Util;
+import com.google.json.JsonSanitizer;
 import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +52,10 @@ public class LoginController {
     * */
 
     @PostMapping(value = "/login")
-    public ResponseEntity<?> login(@RequestBody UserDto user){
+    public ResponseEntity<?> login(@RequestBody LoginDto user){
 
         try {
-            User sanitized = util.validateAndSanitizeUser(user);
+            LoginDto sanitized = util.sanitizeLogin(user);
             User findUser = userService.findUserByUsername(sanitized.getUsername());
             if(new BCryptPasswordEncoder().matches(sanitized.getPassword(), findUser.getPassword())){
                 String token = jwtUtil.generateToken(findUser);
@@ -73,6 +75,7 @@ public class LoginController {
 
         try {
             User sanitized = util.validateAndSanitizeUser(user);
+            logger.info("Sanitized User :: "+ sanitized);
             return new ResponseEntity<>(userService.createNewUser(sanitized),HttpStatus.OK);
 
         } catch (IOException e) {

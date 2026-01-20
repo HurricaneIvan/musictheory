@@ -1,5 +1,6 @@
 package com.example.musictheory.services;
 
+import com.example.musictheory.dtos.UserDto;
 import com.example.musictheory.exception.UserAlreadyExistsException;
 import com.example.musictheory.models.AppUserRole;
 import com.example.musictheory.models.Proficiency;
@@ -19,7 +20,6 @@ import java.util.*;
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-
     @Autowired
     UserRepository userRepository;
 
@@ -27,6 +27,7 @@ public class UserService {
 
     public User findUserByUsername(String username) throws FileNotFoundException {
         Optional<User> response = userRepository.findUserByUsername(username);
+        logger.info("User " + response);
         if (response.isEmpty()){
             logger.info("User not Found");
             throw new FileNotFoundException("User not Found. Try Again");
