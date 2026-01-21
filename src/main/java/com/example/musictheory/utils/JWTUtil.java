@@ -28,9 +28,8 @@ public class JWTUtil {
     private static final long EXPIRATION_TIME = 3600000; // 1 hour
 
     public String generateToken(User user) {
-        logger.info("generateToken :: user {}", user.toString());
         return Jwts.builder()
-                .claim("role", user.getRole()) // .toString is null why?
+                .claim("role", user.getRole())
                 .subject(user.getUsername())
                 .issuedAt((new Date(System.currentTimeMillis())))
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))

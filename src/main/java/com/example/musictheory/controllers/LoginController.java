@@ -48,8 +48,6 @@ public class LoginController {
             User findUser = userService.findUserByUsername(sanitized.getUsername());
             if(new BCryptPasswordEncoder().matches(sanitized.getPassword(), findUser.getPassword())){
                 String token = jwtUtil.generateToken(findUser);
-                String cookie = String.valueOf(jwtUtil.generateJwtCookie(findUser));
-                logger.info("login cookie :: " + cookie);
                 return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, token)
                     .body(userService.findUserByUsername(findUser.getUsername()));
             }
@@ -66,7 +64,6 @@ public class LoginController {
 
         try {
             User sanitized = util.validateAndSanitizeUser(user);
-            logger.info("Sanitized User :: "+ sanitized);
             return new ResponseEntity<>(userService.createNewUser(sanitized),HttpStatus.OK);
 
         } catch (IOException e) {
@@ -74,15 +71,6 @@ public class LoginController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-    }
-
-    //TODO: Work in Progress
-    @PostMapping(value = "/logout")
-    public ResponseEntity<?> logout() {
-//        String user = jwtUtil.extractUsernameFromToken(cookie);
-        ResponseCookie cookie = jwtUtil.getCleanJwtCookie();
-        logger.info(" cookie :: {}" + cookie.toString());
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body("You have been signed out");
     }
 
     @PatchMapping(value = "/update")
