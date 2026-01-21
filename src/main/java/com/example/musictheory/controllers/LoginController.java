@@ -14,12 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -27,7 +23,6 @@ import java.io.IOException;
 @RequestMapping("/api/public")
 public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
-
 
     @Autowired
     private UserService userService;
@@ -81,6 +76,7 @@ public class LoginController {
         }
     }
 
+    //TODO: Work in Progress
     @PostMapping(value = "/logout")
     public ResponseEntity<?> logout() {
 //        String user = jwtUtil.extractUsernameFromToken(cookie);
@@ -89,23 +85,22 @@ public class LoginController {
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body("You have been signed out");
     }
 
-    @PreAuthorize("hasAuthority('USER')")
-    @PostMapping(value = "/update")
-    public ResponseEntity<?> update(@RequestBody UserDto userDto){
+    @PatchMapping(value = "/update")
+    public ResponseEntity<?> update(@RequestBody LoginDto user, @RequestParam String secret){
+
         try {
-            logger.info("user " +userDto.getUsername());
-            if(util.isNotNullOrEmpty(userDto.getUsername())){
-                return new ResponseEntity<>(userService.updateUser(userDto),HttpStatus.OK);
-
-            } else {
-                return ResponseEntity.badRequest().body("Invalid Username");
+            LoginDto sanitized = util.sanitizeLogin(user);
+            User findUser = userService.findUserByUsername(sanitized.getUsername());
+            if(new BCryptPasswordEncoder().matches(sanitized.getPassword(), findUser.getPassword())){
+                return ResponseEntity.ok()
+                        .body(userService.updateUserPW(findUser, secret));
             }
-
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
         } catch (IOException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid credentials");
         }
-//        return ResponseEntity.ok().body("user updated");
     }
+
 }

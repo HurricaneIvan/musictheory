@@ -31,7 +31,6 @@ public class UserService {
 
     public User findUserByUsername(String username) throws FileNotFoundException {
         Optional<User> response = userRepository.findUserByUsername(username);
-        logger.info("User " + response);
         if (response.isEmpty()){
             logger.info("User not Found");
             throw new FileNotFoundException("User not Found. Try Again");
@@ -59,7 +58,6 @@ public class UserService {
 
     public User updateUser(UserDto user) throws FileNotFoundException {
         Optional<User> response = userRepository.findUserByUsername(user.getUsername());
-        logger.info("Response " + response);
         if(response.isEmpty()){
             logger.info("Username does not exist");
             throw new FileNotFoundException("Username does not exist. Retry with existing username");
@@ -70,15 +68,43 @@ public class UserService {
             if(util.isNotNullOrEmpty(user.getLastname())){
                 response.get().setLastName(util.sanitizer(user.getLastname()));
             }
-            if(util.isNotNullOrEmpty(user.getPassword())){
-                response.get().setPassword(util.sanitizer(user.getPassword()));
-            }
             if(util.isNotNullOrEmpty(user.getEmail())){
                 response.get().setEmail(util.sanitizer(user.getEmail()));
             }
         }
-        logger.info("updated response :: " + response.get() );
         return userRepository.save(response.get());
+    }
+
+    public User updateUserPW(User user, String secret) throws FileNotFoundException {
+
+        String regex = "^[a-zA-Z0-9-_]+$";
+        if(util.isNotNullOrEmpty(secret) && secret.matches(regex)){
+            user.setPassword(passwordEncoder.encode(util.sanitizer(secret)));
+        }
+        return userRepository.save(user);
+    }
+
+    public User updateUserRole(String user, String role) throws FileNotFoundException {
+        Optional<User> response = userRepository.findUserByUsername(user);
+        if(response.isEmpty()){
+            logger.error("Username does not exist");
+            throw new FileNotFoundException("Username does not exist. Retry with existing username");
+        } else {
+            if(util.isNotNullOrEmpty(role)){
+                response.get().setRole(String.valueOf(AppUserRole.valueOf(role)));
+            }
+        }
+        return userRepository.save(response.get());
+    }
+
+    public void deleteUser(String username) throws FileNotFoundException {
+        Optional<User> response = userRepository.findUserByUsername(username);
+        if(response.isEmpty()){
+            logger.error("Username does not exist");
+            throw new FileNotFoundException("Username does not exist. Retry with existing username");
+        } else {
+            userRepository.delete(response.get());
+        }
     }
 
 //    @Secured("ADMIN") // only allows admin to call this service.

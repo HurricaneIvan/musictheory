@@ -20,6 +20,6 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
 
     void deleteByUsername(String username);
 
-    // List<User> findByRole(String role);
+    // List<User> findUserByRole(String role);
 
 }

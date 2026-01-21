@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -40,6 +41,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
                     UserDetails userDetails = new User(username, "", Collections.singleton(new SimpleGrantedAuthority(role)));
                     logger.info(userDetails.toString());
+
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null,
                                     userDetails.getAuthorities());
