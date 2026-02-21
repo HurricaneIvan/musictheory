@@ -72,6 +72,7 @@ public class LoginController {
         }
     }
 
+//    TODO: Refactor to update after user login
     @PatchMapping(value = "/update")
     public ResponseEntity<?> update(@RequestBody LoginDto user, @RequestParam String secret){
 
