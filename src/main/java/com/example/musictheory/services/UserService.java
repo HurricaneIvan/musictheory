@@ -6,6 +6,7 @@ import com.example.musictheory.models.AppUserRole;
 import com.example.musictheory.models.Proficiency;
 import com.example.musictheory.models.User;
 import com.example.musictheory.repositories.UserRepository;
+import com.example.musictheory.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,13 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    Util util;
+
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User findUserByUsername(String username) throws FileNotFoundException {
         Optional<User> response = userRepository.findUserByUsername(username);
-        logger.info("User " + response);
         if (response.isEmpty()){
             logger.info("User not Found");
             throw new FileNotFoundException("User not Found. Try Again");
@@ -37,7 +40,6 @@ public class UserService {
     }
 
     public User createNewUser(User user) {
-
         Optional<User> response = userRepository.findUserByUsername(user.getUsername());
         if (response.isPresent()){
             logger.info("Username already exists");
@@ -54,6 +56,56 @@ public class UserService {
         }
     }
 
+    public User updateUser(UserDto user) throws FileNotFoundException {
+        Optional<User> response = userRepository.findUserByUsername(user.getUsername());
+        if(response.isEmpty()){
+            logger.info("Username does not exist");
+            throw new FileNotFoundException("Username does not exist. Retry with existing username");
+        } else {
+            if(util.isNotNullOrEmpty(user.getFirstname())){
+                response.get().setFirstName(util.sanitizer(user.getFirstname()));
+            }
+            if(util.isNotNullOrEmpty(user.getLastname())){
+                response.get().setLastName(util.sanitizer(user.getLastname()));
+            }
+            if(util.isNotNullOrEmpty(user.getEmail())){
+                response.get().setEmail(util.sanitizer(user.getEmail()));
+            }
+        }
+        return userRepository.save(response.get());
+    }
+
+    public User updateUserPW(User user, String secret) throws FileNotFoundException {
+
+        String regex = "^[a-zA-Z0-9-_]+$";
+        if(util.isNotNullOrEmpty(secret) && secret.matches(regex)){
+            user.setPassword(passwordEncoder.encode(util.sanitizer(secret)));
+        }
+        return userRepository.save(user);
+    }
+
+    public User updateUserRole(String user, String role) throws FileNotFoundException {
+        Optional<User> response = userRepository.findUserByUsername(user);
+        if(response.isEmpty()){
+            logger.error("Username does not exist");
+            throw new FileNotFoundException("Username does not exist. Retry with existing username");
+        } else {
+            if(util.isNotNullOrEmpty(role)){
+                response.get().setRole(String.valueOf(AppUserRole.valueOf(role)));
+            }
+        }
+        return userRepository.save(response.get());
+    }
+
+    public void deleteUser(String username) throws FileNotFoundException {
+        Optional<User> response = userRepository.findUserByUsername(username);
+        if(response.isEmpty()){
+            logger.error("Username does not exist");
+            throw new FileNotFoundException("Username does not exist. Retry with existing username");
+        } else {
+            userRepository.delete(response.get());
+        }
+    }
 
 //    @Secured("ADMIN") // only allows admin to call this service.
 //    public void deleteUser(String username){};

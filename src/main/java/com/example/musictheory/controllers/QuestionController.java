@@ -3,7 +3,6 @@ package com.example.musictheory.controllers;
 import com.example.musictheory.dtos.QuestionDto;
 import com.example.musictheory.models.Question;
 import com.example.musictheory.services.QuizService;
-import com.example.musictheory.utils.JWTUtil;
 import com.example.musictheory.utils.Util;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,12 +23,9 @@ import java.util.Optional;
 @RequestMapping("/api/v1")
 public class QuestionController {
 
-    private static final Logger log = LogManager.getLogger(QuestionController.class);
+    private static final Logger logger = LogManager.getLogger(QuestionController.class);
     @Autowired
     private QuizService quizService;
-
-    @Autowired
-    JWTUtil jwtUtil;
 
     @Autowired
     private Util util;
@@ -43,7 +40,6 @@ public class QuestionController {
 
     @GetMapping(value = "/questions")
     public ResponseEntity<List<Question>> getAllQuestions() {
-
         return new ResponseEntity<>(quizService.findAllQuestions(), HttpStatus.OK);
     }
 
@@ -56,24 +52,30 @@ public class QuestionController {
                 throw new IOException("Invalid Uid. Retry with valid uid.");
             }
         } catch (FileNotFoundException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IOException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping(value = "/question")
-    public ResponseEntity<Question> createQuestion(@Valid @RequestBody QuestionDto questionDto) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
+    public ResponseEntity<?> createQuestion(@Valid @RequestBody List<QuestionDto> questionDto) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
 
-        Question question;
         try {
-            question = util.questionValidator(questionDto);
-            return new ResponseEntity<>(quizService.createQuestion(question), HttpStatus.CREATED);
-
+            if (questionDto != null) {
+                List<Question> question = new ArrayList<>();
+                for (QuestionDto dto : questionDto) {
+                    question.add(util.questionValidator(dto));
+                }
+                quizService.createQuestion(question);
+                return new ResponseEntity<>("Questions saved successfully", HttpStatus.CREATED);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input");
+            }
         } catch (IOException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -92,10 +94,10 @@ public class QuestionController {
             return new ResponseEntity<>(quizService.updateQuestion(validated), HttpStatus.OK);
 
         } catch (FileNotFoundException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IOException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -112,10 +114,10 @@ public class QuestionController {
                 throw new IOException("Invalid Uid. Retry with valid uid.");
             }
         } catch (FileNotFoundException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IOException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -133,10 +135,10 @@ public class QuestionController {
             }
 
         } catch (FileNotFoundException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }  catch (IOException e) {
-            log.error("e: ", e);
+            logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

@@ -1,6 +1,5 @@
 package com.example.musictheory.utils;
 
-import com.example.musictheory.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,9 +22,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JWTUtil jwtUtil;
 
-    @Autowired
-    private UserService userService;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
@@ -40,6 +36,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
                     UserDetails userDetails = new User(username, "", Collections.singleton(new SimpleGrantedAuthority(role)));
                     logger.info(userDetails.toString());
+
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null,
                                     userDetails.getAuthorities());

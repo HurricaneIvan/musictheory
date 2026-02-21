@@ -1,6 +1,5 @@
 package com.example.musictheory.config;
 
-import com.example.musictheory.services.UserService;
 import com.example.musictheory.utils.AuthEntryPointJwt;
 import com.example.musictheory.utils.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +24,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private AuthEntryPointJwt authEntryPointJwt;
 
     @Bean
@@ -45,7 +41,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//   Example to restrict APIs based on ROLE
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -61,7 +56,7 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
                                 .requestMatchers("/api/public/**").permitAll()
-                                .requestMatchers("/api/v1/**").hasAnyAuthority( "USER", "DEV", "ADMIN")//.permitAll()
+                                .requestMatchers("/api/v1/**").hasAnyAuthority( "USER", "DEV", "ADMIN")
                                 .anyRequest().authenticated() // All other requests must be authenticated
                 )
                 .formLogin(withDefaults()); // ... configure form login etc.

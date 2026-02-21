@@ -91,10 +91,12 @@ public class QuizServiceTest {
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(generatedUid, "Who dun it?", "image", options, "Butler with the candle stick", "beginner");
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
         assertEquals(expectedUid, generatedUid);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
@@ -105,13 +107,16 @@ public class QuizServiceTest {
         when(util.generateUid()).thenReturn(existingUid, newUid);
         List<String> options = Arrays.asList("Butler with the candle stick", "Gardener in the foyer", "Drunk Nephew", "Jealous Aunt");
         Question expected = new Question(newUid, "Who dun it?", "image", options, "Butler with the candle stick", "beginner");
+        //noinspection unchecked
         when(quizRepository.findQuestionByUid(Mockito.any())).thenReturn(Optional.of(mock(Question.class)), Optional.empty());
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(newUid, "Who dun it?", "image", options, "Butler with the candle stick", "beginner");
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
@@ -126,10 +131,12 @@ public class QuizServiceTest {
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(generatedUid, "Who dun it?", null, options, "Butler with the candle stick", "beginner");
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
         assertEquals(expectedUid, generatedUid);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
@@ -144,10 +151,12 @@ public class QuizServiceTest {
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(generatedUid, "Who dun it?", "", options, "Butler with the candle stick", "beginner");
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
         assertEquals(expectedUid, generatedUid);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
@@ -162,10 +171,12 @@ public class QuizServiceTest {
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(generatedUid, "Who dun it?", "   ", options, "Butler with the candle stick", "beginner");
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
         assertEquals(expectedUid, generatedUid);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
@@ -180,10 +191,12 @@ public class QuizServiceTest {
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(generatedUid, "Who dun it?", "image", options, "Butler with the candle stick", null);
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
         assertEquals(expectedUid, generatedUid);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
@@ -198,10 +211,12 @@ public class QuizServiceTest {
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(generatedUid, "Who dun it?", "image", options, "Butler with the candle stick", "");
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
         assertEquals(expectedUid, generatedUid);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
@@ -216,10 +231,12 @@ public class QuizServiceTest {
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(generatedUid, "Who dun it?", "image", options, "Butler with the candle stick", " ");
-        Question actual = quizService.createQuestion(actualQuestion);
+        List<Question> list = new ArrayList<>();
+        list.add(actualQuestion);
+        List<Question> actual = quizService.createQuestion(list);
 
         assertEquals(expectedUid, generatedUid);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual.get(0));
     }
 
     @Test
