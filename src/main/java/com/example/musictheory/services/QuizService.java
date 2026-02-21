@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,28 +31,31 @@ public class QuizService {
 
     }
 
-    public Question createQuestion(Question question) {
-        String uid;
-        do {
-            uid = util.generateUid();
-        } while (quizRepository.findQuestionByUid(uid).isPresent());
+    public List<Question> createQuestion(List<Question> questions) {
+        List<Question> response = new ArrayList<>();
+        for (Question question : questions){
+            String uid;
+            do {
+                uid = util.generateUid();
+            } while (quizRepository.findQuestionByUid(uid).isPresent());
 
-        System.out.println("UID :: " + uid);
+            System.out.println("UID :: " + uid);
 
-        Question newQuestion = new Question();
-        newQuestion.setUid(uid);
-        newQuestion.setQuestion(question.getQuestion());
-        newQuestion.setOptions(question.getOptions());
-        newQuestion.setAnswer(question.getAnswer());
-        if(question.getImage() != null && !question.getImage().isBlank()){
-            newQuestion.setImage(question.getImage());
+            Question newQuestion = new Question();
+            newQuestion.setUid(uid);
+            newQuestion.setQuestion(question.getQuestion());
+            newQuestion.setOptions(question.getOptions());
+            newQuestion.setAnswer(question.getAnswer());
+            if(question.getImage() != null && !question.getImage().isBlank()){
+                newQuestion.setImage(question.getImage());
+            }
+            if(question.getProficiency() != null && !question.getProficiency().isBlank()){
+                newQuestion.setProficiency(question.getProficiency());
+            }
+            System.out.println(newQuestion.toString());
+            response.add(quizRepository.save(newQuestion));
         }
-        if(question.getProficiency() != null && !question.getProficiency().isBlank()){
-            newQuestion.setProficiency(question.getProficiency());
-        }
-        System.out.println(newQuestion.toString());
-
-        return quizRepository.save(newQuestion);
+        return response;
     }
 
     public Question updateQuestion(Question updatedQuestion) throws IOException {

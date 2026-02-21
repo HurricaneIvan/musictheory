@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,13 +61,19 @@ public class QuestionController {
     }
 
     @PostMapping(value = "/question")
-    public ResponseEntity<Question> createQuestion(@Valid @RequestBody QuestionDto questionDto) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
+    public ResponseEntity<?> createQuestion(@Valid @RequestBody List<QuestionDto> questionDto) { // input is a sub-model: question, options, answer, uid is generated internally(not public)
 
-        Question question;
         try {
-            question = util.questionValidator(questionDto);
-            return new ResponseEntity<>(quizService.createQuestion(question), HttpStatus.CREATED);
-
+            if (questionDto != null) {
+                List<Question> question = new ArrayList<>();
+                for (QuestionDto dto : questionDto) {
+                    question.add(util.questionValidator(dto));
+                }
+                quizService.createQuestion(question);
+                return new ResponseEntity<>("Questions saved successfully", HttpStatus.CREATED);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input");
+            }
         } catch (IOException e) {
             logger.error("e: ", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
