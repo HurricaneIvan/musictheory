@@ -27,10 +27,10 @@ public class LoginController {
     private UserService userService;
 
     @Autowired
-    JWTUtil jwtUtil;
+    private JWTUtil jwtUtil;
 
     @Autowired
-    Util util;
+    private Util util;
 
     /*
     * Endpoints:

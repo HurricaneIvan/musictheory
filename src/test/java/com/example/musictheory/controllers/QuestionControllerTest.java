@@ -446,7 +446,7 @@ public class QuestionControllerTest {
     @Test
     public void testDeleteQuestion_InvalidUid() throws Exception {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/delete")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("P@R^9"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
         assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());

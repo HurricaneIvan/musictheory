@@ -22,7 +22,7 @@ public class AuthUserController {
     private UserService userService;
 
     @Autowired
-    Util util;
+    private Util util;
 
     @PatchMapping(value = "/update")
     public ResponseEntity<?> update(@RequestBody UserDto userDto){

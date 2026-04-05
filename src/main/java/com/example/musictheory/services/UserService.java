@@ -57,22 +57,23 @@ public class UserService {
     }
 
     public User updateUser(UserDto user) throws FileNotFoundException {
-        Optional<User> response = userRepository.findUserByUsername(user.getUsername());
-        if(response.isEmpty()){
-            logger.info("Username does not exist");
-            throw new FileNotFoundException("Username does not exist. Retry with existing username");
-        } else {
-            if(util.isNotNullOrEmpty(user.getFirstname())){
-                response.get().setFirstName(util.sanitizer(user.getFirstname()));
-            }
-            if(util.isNotNullOrEmpty(user.getLastname())){
-                response.get().setLastName(util.sanitizer(user.getLastname()));
-            }
-            if(util.isNotNullOrEmpty(user.getEmail())){
-                response.get().setEmail(util.sanitizer(user.getEmail()));
-            }
+        User existingUser = userRepository.findUserByUsername(user.getUsername())
+                .orElseThrow(() -> {
+                    logger.info("Username does not exist");
+                    return new FileNotFoundException("Username does not exist. Retry with existing username");
+                });
+
+        if(util.isNotNullOrEmpty(user.getFirstname())){
+            existingUser.setFirstName(util.sanitizer(user.getFirstname()));
         }
-        return userRepository.save(response.get());
+        if(util.isNotNullOrEmpty(user.getLastname())){
+            existingUser.setLastName(util.sanitizer(user.getLastname()));
+        }
+        if(util.isNotNullOrEmpty(user.getEmail())){
+            existingUser.setEmail(util.sanitizer(user.getEmail()));
+        }
+
+        return userRepository.save(existingUser);
     }
 
     public User updateUserPW(User user, String secret) throws FileNotFoundException {
@@ -98,13 +99,12 @@ public class UserService {
     }
 
     public void deleteUser(String username) throws FileNotFoundException {
-        Optional<User> response = userRepository.findUserByUsername(username);
-        if(response.isEmpty()){
-            logger.error("Username does not exist");
-            throw new FileNotFoundException("Username does not exist. Retry with existing username");
-        } else {
-            userRepository.delete(response.get());
-        }
+        User existingUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> {
+                    logger.error("Username does not exist");
+                    return new FileNotFoundException("Username does not exist. Retry with existing username");
+                });
+        userRepository.delete(existingUser);
     }
 
 //    @Secured("ADMIN") // only allows admin to call this service.

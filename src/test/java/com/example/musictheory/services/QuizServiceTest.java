@@ -107,8 +107,9 @@ public class QuizServiceTest {
         when(util.generateUid()).thenReturn(existingUid, newUid);
         List<String> options = Arrays.asList("Butler with the candle stick", "Gardener in the foyer", "Drunk Nephew", "Jealous Aunt");
         Question expected = new Question(newUid, "Who dun it?", "image", options, "Butler with the candle stick", "beginner");
-        //noinspection unchecked
-        when(quizRepository.findQuestionByUid(Mockito.any())).thenReturn(Optional.of(mock(Question.class)), Optional.empty());
+        when(quizRepository.findQuestionByUid(Mockito.any()))
+                .thenReturn(Optional.of(mock(Question.class)))
+                .thenReturn(Optional.empty());
         when(quizRepository.save(expected)).thenReturn(expected);
 
         Question actualQuestion = new Question(newUid, "Who dun it?", "image", options, "Butler with the candle stick", "beginner");
